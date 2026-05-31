@@ -1,0 +1,49 @@
+CREATE TABLE IF NOT EXISTS productos (
+  id SERIAL PRIMARY KEY,
+  sku VARCHAR(50) UNIQUE NOT NULL,
+  nombre VARCHAR(120) NOT NULL,
+  stock_actual INT NOT NULL DEFAULT 0,
+  stock_minimo INT NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ventas (
+  id SERIAL PRIMARY KEY,
+  fecha TIMESTAMP NOT NULL DEFAULT NOW(),
+  sku VARCHAR(50) NOT NULL,
+  cantidad INT NOT NULL,
+  origen VARCHAR(20) NOT NULL DEFAULT 'webhook',
+  raw_json TEXT
+);
+
+CREATE TABLE IF NOT EXISTS alertas (
+  id SERIAL PRIMARY KEY,
+  fecha TIMESTAMP NOT NULL DEFAULT NOW(),
+  sku VARCHAR(50) NOT NULL,
+  tipo VARCHAR(30) NOT NULL,
+  mensaje TEXT NOT NULL,
+  estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE'
+);
+
+CREATE TABLE IF NOT EXISTS auditoria (
+  id SERIAL PRIMARY KEY,
+  fecha TIMESTAMP NOT NULL DEFAULT NOW(),
+  evento VARCHAR(50) NOT NULL,
+  detalle TEXT
+);
+
+CREATE TABLE IF NOT EXISTS errores (
+  id SERIAL PRIMARY KEY,
+  fecha TIMESTAMP NOT NULL DEFAULT NOW(),
+  workflow VARCHAR(80),
+  paso VARCHAR(80),
+  error_msg TEXT NOT NULL,
+  payload TEXT
+);
+
+INSERT INTO productos (sku, nombre, stock_actual, stock_minimo)
+VALUES
+('ARROZ-001', 'Arroz 1lb', 20, 5),
+('AZUCAR-002', 'Azucar 1lb', 10, 3),
+('CAFE-003', 'Cafe 500g', 8, 2)
+ON CONFLICT (sku) DO NOTHING;

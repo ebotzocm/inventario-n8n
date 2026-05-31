@@ -1,0 +1,268 @@
+{
+  "name": "WF3_Reporte_Semanal_Reorden",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    p.sku,\n    p.nombre,\n    p.stock_actual,\n    p.stock_minimo,\n    COALESCE(SUM(v.cantidad), 0) AS ventas_semana\nFROM productos p\nLEFT JOIN ventas v\n    ON p.sku = v.sku\n    AND v.fecha >= NOW() - INTERVAL '7 days'\nGROUP BY p.sku, p.nombre, p.stock_actual, p.stock_minimo\nORDER BY p.sku;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "af2a9fea-0b2c-4600-85c7-1cac314f226a",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "nE5iTi1aDbjn9oP4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const sku = item.json.sku;\n  const nombre = item.json.nombre;\n  const stockActual = Number(item.json.stock_actual || 0);\n  const stockMinimo = Number(item.json.stock_minimo || 0);\n  const ventasSemana = Number(item.json.ventas_semana || 0);\n\n  let sugerenciaReorden = (ventasSemana + stockMinimo) - stockActual;\n  if (sugerenciaReorden < 0) {\n    sugerenciaReorden = 0;\n  }\n\n  let estado = \"NORMAL\";\n  if (stockActual <= stockMinimo) {\n    estado = \"BAJO_STOCK\";\n  }\n\n  return {\n    json: {\n      sku,\n      nombre,\n      stock_actual: stockActual,\n      stock_minimo: stockMinimo,\n      ventas_semana: ventasSemana,\n      sugerencia_reorden: sugerenciaReorden,\n      estado\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a9fb31c2-b879-412c-80c8-221a21c2b456",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "fb8cc161-f97b-411c-aba8-a0fba9cf9f8e",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "auditoria",
+          "mode": "list",
+          "cachedResultName": "auditoria"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha": "={{$now}}",
+            "evento": "REPORTE_SEMANAL_GENERADO",
+            "detalle": "Reporte semanal generado correctamente en formato CSV con sugerencia de reorden"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evento",
+              "displayName": "evento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1056,
+        0
+      ],
+      "id": "ae1ebb56-da57-4f38-82c2-ba5da6bec356",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "nE5iTi1aDbjn9oP4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generar-reporte",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "43bbb5a5-ba78-4dd5-9933-9508572da1f3",
+      "name": "Webhook",
+      "webhookId": "edf6f3a7-a2f0-403a-bb62-8d5ea23397e2"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": true,\n  \"mensaje\": \"Reporte semanal generado correctamente\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1232,
+        0
+      ],
+      "id": "41ac794a-0223-49c0-b0d0-f94e98a03fcd",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/files/out/reporte_{{$now.toFormat(\"dd-MM-yyyy\")}}.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "0f02baac-db52-4026-ab97-94633e8155ab",
+      "name": "Read/Write Files from Disk",
+      "alwaysOutputData": false
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1e7e1f03-6a10-48bd-958d-82e7971fa254",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f357765a7df2fd989b45303872fe544cfc570ab1d4d3a47eba489a8b83739de5"
+  },
+  "id": "ADKE6QjiBEfviaTC",
+  "tags": []
+}

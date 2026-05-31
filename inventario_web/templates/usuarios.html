@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="panel">
+
+    <div class="panel-header">
+        <h2>Gestión de usuarios</h2>
+
+        <button type="button" class="btn btn-primary" onclick="abrirModalAgregarUsuario()">
+            + Nuevo usuario
+        </button>
+    </div>
+
+    <form method="GET" class="filter-form">
+        <input type="text"
+               name="buscar"
+               placeholder="Buscar por nombre, usuario o rol"
+               value="{{ buscar or '' }}">
+
+        <button type="submit" class="btn btn-primary">
+            Buscar
+        </button>
+
+        <a href="{{ url_for('usuarios') }}" class="btn btn-secondary">
+            Limpiar
+        </a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Fecha creación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td>{{ u[0] }}</td>
+                <td>{{ u[1] }}</td>
+                <td>{{ u[2] }}</td>
+
+                <td>
+                    {% if u[3] == 'admin' %}
+                        <span class="badge badge-danger">Admin</span>
+                    {% elif u[3] == 'inventario' %}
+                        <span class="badge badge-success">Inventario</span>
+                    {% elif u[3] == 'ventas' %}
+                        <span class="badge badge-warning">Ventas</span>
+                    {% elif u[3] == 'supervisor' %}
+                        <span class="badge badge-success">Supervisor</span>
+                    {% else %}
+                        <span class="badge badge-warning">{{ u[3] }}</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ u[4] }}</td>
+
+                <td>
+                    <div class="actions">
+                        <button type="button"
+                                class="btn btn-warning"
+                                onclick="abrirModalEditarUsuario(
+                                    '{{ u[0] }}',
+                                    '{{ u[1] }}',
+                                    '{{ u[2] }}',
+                                    '{{ u[3] }}'
+                                )">
+                            Editar
+                        </button>
+
+                        {% if session.get('user_id') != u[0] %}
+                        <form method="POST"
+                            action="{{ url_for('eliminar_usuario', usuario_id=u[0]) }}"
+                            onsubmit="event.preventDefault(); abrirConfirmModal(this, 'Eliminar usuario', '¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.');"
+                            style="display:inline;">
+                            <button type="submit" class="btn btn-danger">
+                                Eliminar
+                            </button>
+                        </form>
+                        {% else %}
+                            <span class="badge badge-warning">Usuario actual</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</section>
+
+
+<!-- MODAL AGREGAR USUARIO -->
+<div id="modalAgregarUsuario" class="modal-producto">
+    <div class="modal-producto-content">
+
+        <div class="modal-producto-header">
+            <h3>Agregar usuario</h3>
+            <button type="button" class="modal-close" onclick="cerrarModalAgregarUsuario()">×</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('agregar_usuario') }}">
+
+            <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" name="nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label>Usuario</label>
+                <input type="text" name="usuario" required>
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <label>Rol</label>
+                <select name="rol" required>
+                    <option value="">Seleccione rol</option>
+                    <option value="admin">Administrador</option>
+                    <option value="inventario">Inventario</option>
+                    <option value="ventas">Ventas</option>
+                    <option value="supervisor">Supervisor</option>
+                </select>
+            </div>
+
+            <div class="modal-producto-actions">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalAgregarUsuario()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn btn-primary">
+                    Guardar usuario
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<!-- MODAL EDITAR USUARIO -->
+<div id="modalEditarUsuario" class="modal-producto">
+    <div class="modal-producto-content">
+
+        <div class="modal-producto-header">
+            <h3>Editar usuario</h3>
+            <button type="button" class="modal-close" onclick="cerrarModalEditarUsuario()">×</button>
+        </div>
+
+        <form id="formEditarUsuario" method="POST">
+
+            <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" id="edit_nombre" name="nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label>Usuario</label>
+                <input type="text" id="edit_usuario" name="usuario" required>
+            </div>
+
+            <div class="form-group">
+                <label>Rol</label>
+                <select id="edit_rol" name="rol" required>
+                    <option value="admin">Administrador</option>
+                    <option value="inventario">Inventario</option>
+                    <option value="ventas">Ventas</option>
+                    <option value="supervisor">Supervisor</option>
+                </select>
+            </div>
+
+            <div class="modal-producto-actions">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalEditarUsuario()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn btn-primary">
+                    Actualizar usuario
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+
+function abrirModalAgregarUsuario() {
+    document.getElementById("modalAgregarUsuario").style.display = "flex";
+}
+
+function cerrarModalAgregarUsuario() {
+    document.getElementById("modalAgregarUsuario").style.display = "none";
+}
+
+function abrirModalEditarUsuario(id, nombre, usuario, rol) {
+    document.getElementById("modalEditarUsuario").style.display = "flex";
+
+    document.getElementById("edit_nombre").value = nombre;
+    document.getElementById("edit_usuario").value = usuario;
+    document.getElementById("edit_rol").value = rol;
+
+    document.getElementById("formEditarUsuario").action =
+        "/usuarios/editar/" + id;
+}
+
+function cerrarModalEditarUsuario() {
+    document.getElementById("modalEditarUsuario").style.display = "none";
+}
+
+window.addEventListener("click", function(event) {
+    const modalAgregar = document.getElementById("modalAgregarUsuario");
+    const modalEditar = document.getElementById("modalEditarUsuario");
+
+    if (event.target === modalAgregar) {
+        modalAgregar.style.display = "none";
+    }
+
+    if (event.target === modalEditar) {
+        modalEditar.style.display = "none";
+    }
+});
+
+</script>
+
+{% endblock %}

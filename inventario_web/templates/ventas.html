@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+    <h2>Registrar venta</h2>
+
+    <form method="POST" action="{{ url_for('registrar_venta') }}" class="form-grid form-3">
+        <select name="sku" required>
+            <option value="">Seleccione producto</option>
+            {% for p in productos %}
+            <option value="{{ p[0] }}">{{ p[1] }} (Stock: {{ p[2] }})</option>
+            {% endfor %}
+        </select>
+
+        <input type="number" name="cantidad" placeholder="Cantidad" required>
+        <button type="submit">Procesar venta</button>
+    </form>
+
+</section>
+
+<section class="panel">
+    <h2>Últimas ventas</h2>
+
+    <form method="GET" class="filter-form">
+        <input type="text"
+            name="buscar"
+            placeholder="Buscar por SKU"
+            value="{{ buscar or '' }}">
+
+        <input type="date"
+            name="fecha"
+            value="{{ fecha or '' }}">
+
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+
+        <a href="{{ url_for('ventas') }}" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>SKU</th>
+                <th>Cantidad</th>
+                <th>Origen</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% if ventas %}
+
+                {% for venta in ventas %}
+                <tr>
+                    <td>{{ venta[0] }}</td>
+                    <td>{{ venta[1] }}</td>
+                    <td>{{ venta[2] }}</td>
+                    <td>{{ venta[3] }}</td>
+                    <td>{{ venta[4] }}</td>
+                </tr>
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+                    <td colspan="5" style="text-align:center;">
+                        No hay ventas registradas
+                    </td>
+                </tr>
+
+            {% endif %}
+
+        </tbody>
+    </table>
+
+    <div class="pagination">
+
+        {% if page > 1 %}
+            <a href="{{ url_for('ventas',
+                page=page-1,
+                buscar=buscar,
+                fecha=fecha) }}">
+                Anterior
+            </a>
+        {% endif %}
+
+        <span>
+            Página {{ page }} de {{ total_pages }}
+        </span>
+
+        {% if page < total_pages %}
+            <a href="{{ url_for('ventas',
+                page=page+1,
+                buscar=buscar,
+                fecha=fecha) }}">
+                Siguiente
+            </a>
+        {% endif %}
+
+    </div>
+
+</section>
+{% endblock %}

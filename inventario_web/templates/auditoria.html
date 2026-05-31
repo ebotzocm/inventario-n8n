@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="panel">
+
+    <div class="panel-header">
+        <h2>Auditoría del sistema</h2>
+    </div>
+
+    <form method="GET" class="filter-form">
+        <input type="text"
+               name="buscar"
+               placeholder="Buscar evento o detalle"
+               value="{{ buscar or '' }}">
+
+        <button type="submit" class="btn btn-primary">
+            Buscar
+        </button>
+
+        <a href="{{ url_for('auditoria') }}" class="btn btn-secondary">
+            Limpiar
+        </a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Evento</th>
+                <th>Detalle</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% if auditorias %}
+                {% for a in auditorias %}
+                <tr>
+                    <td>{{ a[0] }}</td>
+                    <td>{{ a[1] }}</td>
+                    <td>
+                        <span class="badge badge-warning">
+                            {{ a[2] }}
+                        </span>
+                    </td>
+                    <td>{{ a[3] }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align:center;">
+                        No hay registros de auditoría
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+</section>
+
+{% endblock %}

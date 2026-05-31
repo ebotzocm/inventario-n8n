@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>Reabastecimiento de inventario</h2>
+    </div>
+
+    <form method="POST" class="form-grid">
+        <label>Producto</label>
+        <select name="sku" required>
+            <option value="">Seleccione producto</option>
+            {% for p in productos %}
+            <option value="{{ p[0] }}">
+                {{ p[1] }} - Stock: {{ p[2] }} / Mínimo: {{ p[3] }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <label>Cantidad a agregar</label>
+        <input type="number" name="cantidad" min="1" required>
+
+        <label>Motivo</label>
+        <input type="text" name="motivo" placeholder="Compra a proveedor, ajuste, devolución..." required>
+
+        <button type="submit">Registrar reabastecimiento</button>
+    </form>
+</section>
+
+<section class="panel">
+    <h2>Historial de reabastecimientos</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>SKU</th>
+                <th>Cantidad</th>
+                <th>Motivo</th>
+                <th>Usuario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in historial %}
+            <tr>
+                <td>{{ r[0] }}</td>
+                <td>{{ r[1] }}</td>
+                <td>{{ r[2] }}</td>
+                <td>{{ r[3] }}</td>
+                <td>{{ r[4] }}</td>
+                <td>{{ r[5] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

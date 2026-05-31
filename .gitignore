@@ -1,0 +1,22 @@
+# Entorno virtual
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# Archivos temporales
+*.log
+
+# Reportes generados
+reportes_generados/
+
+# Base de datos local
+*.db
+
+# Variables de entorno
+.env

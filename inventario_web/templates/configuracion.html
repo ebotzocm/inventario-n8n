@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="panel">
+
+    <div class="panel-header">
+        <h2>Configuración del sistema</h2>
+    </div>
+
+    <form method="POST"
+          enctype="multipart/form-data"
+          class="config-form">
+
+        <div class="form-group">
+            <label>Nombre del negocio</label>
+            <input type="text"
+                   name="nombre_negocio"
+                   value="{{ config[1] }}"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>Correo para alertas</label>
+            <input type="email"
+                   name="correo_alertas"
+                   value="{{ config[2] or '' }}"
+                   placeholder="correo@empresa.com">
+        </div>
+
+        <div class="form-group">
+            <label>Stock mínimo global</label>
+            <input type="number"
+                   name="stock_minimo_global"
+                   value="{{ config[3] }}"
+                   min="0"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>Logo del sistema</label>
+            <input type="file"
+                   name="logo"
+                   accept=".png,.jpg,.jpeg,.webp">
+        </div>
+
+        {% if config[4] %}
+        <div class="logo-preview">
+            <p>Logo actual:</p>
+            <img src="{{ url_for('static', filename=config[4]) }}"
+                 alt="Logo actual">
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary">
+            Guardar configuración
+        </button>
+
+    </form>
+
+</section>
+
+{% endblock %}

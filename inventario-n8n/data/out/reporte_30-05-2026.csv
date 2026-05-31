@@ -1,0 +1,28 @@
+﻿sku,nombre,stock_actual,stock_minimo,ventas_semana,sugerencia_reorden,estado
+ACEITE-009,Aceite vegetal 1L,26,5,25,4,NORMAL
+AGUA-003,Agua embotellada,28,5,250,227,NORMAL
+ARROZ-001,Arroz 1lb,26,0,18,0,NORMAL
+ATUN-017,Atun en lata,39,8,1,0,NORMAL
+AZUCAR-002,Azucar 1lb,15,3,180,168,NORMAL
+CAFE-003,Cafe 500g,20,2,18,0,NORMAL
+CAFE-007,Cafe en bolsa de una libra,50,10,0,0,NORMAL
+CEREAL-020,Cereal de maiz,18,4,0,0,NORMAL
+CREMA-021,Medio litro de crema,25,8,0,0,NORMAL
+FRIJOL-005,Frijol en bola 1 Lbr,9,3,0,0,NORMAL
+FRIJOL-008,Frijol negro 1lb,45,10,0,0,NORMAL
+GALLETAS-016,Galletas de chocolate,50,10,0,0,NORMAL
+GASEOSA-023,Pepsi,35,8,0,0,NORMAL
+HUEVOS-012,Carton de huevos,18,6,16,4,NORMAL
+JABON-013,Jabon para ropa,22,5,0,0,NORMAL
+JUGO-019,Jugo de naranja 1L,20,5,0,0,NORMAL
+LECHE-004,Leche Liquida 1L,2,0,0,0,NORMAL
+MANTEQUILLA-021,Mantequilla 250g,16,4,0,0,NORMAL
+PAPEL-015,Papel higienico 4 rollos,28,6,0,0,NORMAL
+PASTA-010,Pasta Espagueti,60,15,0,0,NORMAL
+QUESO-020,Queso fresco 1lb,12,3,0,0,NORMAL
+SAL-011,Sal de mesa 500g,30,5,0,0,NORMAL
+SALCHICHAS-024,Salchichas de pavo ahumadas,25,8,0,0,NORMAL
+SHAMPOO-014,Shampoo 400ml,15,4,0,0,NORMAL
+SODA-018,Soda coca cola 2L,32,6,0,0,NORMAL
+Té-006,Caja de Té de sabores,25,5,0,0,NORMAL
+TEQUILA-022,Tequila Don Julio,25,5,0,0,NORMAL

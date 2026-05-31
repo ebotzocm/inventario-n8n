@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="cards dashboard-cards">
+    <div class="card">
+        <h3>Total de productos</h3>
+        <p>{{ total_productos }}</p>
+    </div>
+
+    <div class="card success">
+        <h3>Total de ventas</h3>
+        <p>{{ total_ventas }}</p>
+    </div>
+
+    <div class="card warning">
+        <h3>Ventas de hoy</h3>
+        <p>{{ ventas_hoy }}</p>
+    </div>
+
+    <div class="card danger">
+        <h3>Alertas pendientes</h3>
+        <p>{{ total_alertas }}</p>
+    </div>
+
+    <div class="card danger">
+        <h3>Productos críticos</h3>
+        <p>{{ productos_criticos }}</p>
+    </div>
+</div>
+
+<div class="grid-two">
+    <section class="panel">
+        <h2>Ventas por producto</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Producto</th>
+                    <th>Vendido</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in ventas_producto %}
+                <tr>
+                    <td>{{ v[0] }}</td>
+                    <td>{{ v[1] }}</td>
+                    <td>{{ v[2] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Stock actual por producto</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Producto</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in stock_producto %}
+                <tr>
+                    <td>{{ s[0] }}</td>
+                    <td>{{ s[1] }}</td>
+                    <td>
+                        {% if s[2] <= 3 %}
+                            <span class="badge badge-danger">{{ s[2] }}</span>
+                        {% else %}
+                            <span class="badge badge-success">{{ s[2] }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+
+<div class="grid-two">
+    <section class="panel">
+        <h2>Top productos vendidos</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Producto</th>
+                    <th>Total vendido</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in top_vendidos %}
+                <tr>
+                    <td>{{ p[0] }}</td>
+                    <td>{{ p[1] }}</td>
+                    <td>{{ p[2] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Productos con bajo stock</h2>
+
+        {% if bajos_stock %}
+        <table>
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Producto</th>
+                    <th>Stock</th>
+                    <th>Mínimo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in bajos_stock %}
+                <tr>
+                    <td>{{ p[0] }}</td>
+                    <td>{{ p[1] }}</td>
+                    <td><span class="badge badge-danger">{{ p[2] }}</span></td>
+                    <td>{{ p[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No hay productos en bajo stock.</p>
+        {% endif %}
+    </section>
+</div>
+
+<div class="grid-two">
+    <section class="panel">
+        <h2>Últimas ventas</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>SKU</th>
+                    <th>Cantidad</th>
+                    <th>Origen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in ultimas_ventas %}
+                <tr>
+                    <td>{{ v[0] }}</td>
+                    <td>{{ v[1] }}</td>
+                    <td>{{ v[2] }}</td>
+                    <td>{{ v[3] }}</td>
+                    <td>{{ v[4] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Últimas alertas pendientes</h2>
+
+        {% if ultimas_alertas %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>SKU</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in ultimas_alertas %}
+                <tr>
+                    <td>{{ a[0] }}</td>
+                    <td>{{ a[2] }}</td>
+                    <td>{{ a[3] }}</td>
+                    <td><span class="badge badge-danger">{{ a[5] }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No hay alertas pendientes.</p>
+        {% endif %}
+    </section>
+</div>
+
+<section class="dashboard-grid">
+
+    <div class="panel chart-card">
+        <h2>Ventas por producto</h2>
+        <canvas id="ventasProductoChart"></canvas>
+    </div>
+
+    <div class="panel chart-card">
+        <h2>Stock actual por producto</h2>
+        <canvas id="stockProductoChart"></canvas>
+    </div>
+
+</section>
+
+<section class="dashboard-grid">
+
+    <div class="panel chart-card">
+        <h2>Productos críticos</h2>
+        <canvas id="productosCriticosChart"></canvas>
+    </div>
+
+    <div class="panel chart-card">
+        <h2>Ventas por día</h2>
+        <canvas id="ventasDiaChart"></canvas>
+    </div>
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ventasProductoLabels = {{ ventas_producto | map(attribute=0) | list | tojson }};
+const ventasProductoData = {{ ventas_producto | map(attribute=1) | list | tojson }};
+
+const stockProductoLabels = {{ stock_producto | map(attribute=0) | list | tojson }};
+const stockProductoData = {{ stock_producto | map(attribute=1) | list | tojson }};
+
+const productosCriticosLabels = {{ productos_bajo_stock | map(attribute=0) | list | tojson }};
+const productosCriticosStock = {{ productos_bajo_stock | map(attribute=1) | list | tojson }};
+const productosCriticosMinimo = {{ productos_bajo_stock | map(attribute=2) | list | tojson }};
+
+const ventasDiaLabels = {{ ventas_dia | map(attribute=0) | list | tojson }};
+const ventasDiaData = {{ ventas_dia | map(attribute=1) | list | tojson }};
+
+new Chart(document.getElementById("ventasProductoChart"), {
+    type: "bar",
+    data: {
+        labels: ventasProductoLabels,
+        datasets: [{
+            label: "Ventas",
+            data: ventasProductoData,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+new Chart(document.getElementById("stockProductoChart"), {
+    type: "bar",
+    data: {
+        labels: stockProductoLabels,
+        datasets: [{
+            label: "Stock",
+            data: stockProductoData,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        indexAxis: "y"
+    }
+});
+
+new Chart(document.getElementById("productosCriticosChart"), {
+    type: "bar",
+    data: {
+        labels: productosCriticosLabels,
+        datasets: [
+            {
+                label: "Stock actual",
+                data: productosCriticosStock,
+                borderWidth: 1
+            },
+            {
+                label: "Stock mínimo",
+                data: productosCriticosMinimo,
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true
+    }
+});
+
+new Chart(document.getElementById("ventasDiaChart"), {
+    type: "line",
+    data: {
+        labels: ventasDiaLabels,
+        datasets: [{
+            label: "Ventas por día",
+            data: ventasDiaData,
+            tension: 0.3,
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true
+    }
+});
+
+</script>
+
+{% endblock %}

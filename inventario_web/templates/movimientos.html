@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="panel">
+
+    <div class="panel-header">
+        <h2>Historial de movimientos</h2>
+    </div>
+
+    <form method="GET" class="filter-form">
+        <input type="text"
+            name="buscar"
+            placeholder="Buscar SKU o detalle"
+            value="{{ buscar or '' }}">
+
+        <select name="tipo">
+            <option value="">Todos los tipos</option>
+            <option value="VENTA" {% if tipo == 'VENTA' %}selected{% endif %}>Venta</option>
+            <option value="REABASTECIMIENTO" {% if tipo == 'REABASTECIMIENTO' %}selected{% endif %}>Reabastecimiento</option>
+            <option value="CREACION" {% if tipo == 'CREACION' %}selected{% endif %}>Creación</option>
+            <option value="AJUSTE" {% if tipo == 'AJUSTE' %}selected{% endif %}>Ajuste</option>
+            <option value="ELIMINACION" {% if tipo == 'ELIMINACION' %}selected{% endif %}>Eliminación</option>
+        </select>
+
+        <input type="text"
+            name="usuario"
+            placeholder="Usuario"
+            value="{{ usuario or '' }}">
+
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+
+        <a href="{{ url_for('movimientos') }}" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>SKU</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Detalle</th>
+                <th>Usuario</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for m in movimientos %}
+            <tr>
+
+                <td>{{ m[0] }}</td>
+                <td>{{ m[1] }}</td>
+                <td>{{ m[2] }}</td>
+
+                <td>
+                    {% if m[3] == 'VENTA' %}
+                        <span class="badge badge-danger">VENTA</span>
+
+                    {% elif m[3] == 'REABASTECIMIENTO' %}
+                        <span class="badge badge-success">
+                            REABASTECIMIENTO
+                        </span>
+
+                    {% elif m[3] == 'CREACION' %}
+                        <span class="badge badge-warning">
+                            CREACION
+                        </span>
+
+                    {% else %}
+                        <span class="badge">
+                            {{ m[3] }}
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td>{{ m[4] }}</td>
+                <td>{{ m[5] }}</td>
+                <td>{{ m[6] }}</td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</section>
+
+{% endblock %}

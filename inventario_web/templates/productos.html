@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="panel">
+
+    <div class="panel-header">
+        <h2>Gestión de Productos</h2>
+
+        {% if session.get('rol') in ['admin', 'inventario'] %}
+        <button type="button" class="btn btn-primary" onclick="abrirModalAgregar()">
+            + Nuevo producto
+        </button>
+        {% endif %}
+    </div>
+
+    <form method="GET" class="filter-form">
+        <input type="text"
+            name="buscar"
+            placeholder="Buscar por SKU o nombre"
+            value="{{ buscar or '' }}">
+
+        <button type="submit" class="btn btn-primary">Buscar</button>
+
+        <a href="{{ url_for('productos') }}" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>SKU</th>
+                <th>Nombre</th>
+                <th>Stock Actual</th>
+                <th>Stock Mínimo</th>
+                <th>Última actualización</th>
+
+                {% if session.get('rol') in ['admin', 'inventario'] %}
+                <th>Acciones</th>
+                {% endif %}
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for producto in productos %}
+
+            <tr>
+
+                <td>{{ producto[0] }}</td>
+
+                <td>
+                    <strong>{{ producto[1] }}</strong>
+                </td>
+
+                <td>{{ producto[2] }}</td>
+
+                <td>
+
+                    {% if producto[3] <= producto[4] %}
+                        <span class="badge badge-danger">
+                            {{ producto[3] }}
+                        </span>
+                    {% else %}
+                        <span class="badge badge-success">
+                            {{ producto[3] }}
+                        </span>
+                    {% endif %}
+
+                </td>
+
+                <td>{{ producto[4] }}</td>
+
+                <td>{{ producto[5] }}</td>
+
+                {% if session.get('rol') in ['admin', 'inventario'] %}
+                <td>
+
+                    <div class="actions">
+
+                        <button type="button"
+                                class="btn btn-warning"
+                                onclick="abrirModalEditar(
+                                    '{{ producto[0] }}',
+                                    '{{ producto[1] }}',
+                                    '{{ producto[2] }}',
+                                    '{{ producto[3] }}',
+                                    '{{ producto[4] }}'
+                                )">
+                            Editar
+                        </button>
+
+                        {% if session.get('rol') == 'admin' %}
+
+                        <form method="POST"
+                            action="{{ url_for('eliminar_producto', producto_id=producto[0]) }}"
+                            onsubmit="event.preventDefault(); abrirConfirmModal(this, 'Eliminar producto', '¿Seguro que deseas eliminar este producto? Esta acción no se puede deshacer.');"
+                            style="display:inline;">
+                            <button type="submit" class="btn btn-danger">
+                                Eliminar
+                            </button>
+                        </form>
+
+                        {% endif %}
+
+                    </div>
+
+                </td>
+                {% endif %}
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+    </table>
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="{{ url_for('productos', page=page-1, buscar=buscar) }}">
+                Anterior
+            </a>
+        {% endif %}
+
+        <span>Página {{ page }} de {{ total_pages }}</span>
+
+        {% if page < total_pages %}
+            <a href="{{ url_for('productos', page=page+1, buscar=buscar) }}">
+                Siguiente
+            </a>
+        {% endif %}
+    </div>
+
+
+</section>
+
+
+
+
+
+<!-- MODAL AGREGAR -->
+
+<div id="modalAgregar" class="modal-producto">
+    <div class="modal-producto-content">
+
+        <div class="modal-producto-header">
+            <h3>Agregar producto</h3>
+            <button type="button" class="modal-close" onclick="cerrarModalAgregar()">×</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('agregar_producto') }}">
+
+            <div class="form-group">
+                <label>SKU</label>
+                <input type="text" name="sku" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" name="nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label>Stock actual</label>
+                <input type="number" name="stock_actual" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label>Stock mínimo</label>
+                <input type="number" name="stock_minimo" min="0" required>
+            </div>
+
+            <div class="modal-producto-actions">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalAgregar()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn btn-primary">
+                    Guardar producto
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+
+
+
+
+<!-- MODAL EDITAR -->
+
+<div id="modalEditar" class="modal-producto">
+    <div class="modal-producto-content">
+
+        <div class="modal-producto-header">
+            <h3>Editar producto</h3>
+            <button type="button" class="modal-close" onclick="cerrarModalEditar()">×</button>
+        </div>
+
+        <form id="formEditar" method="POST">
+
+            <div class="form-group">
+                <label>SKU</label>
+                <input type="text" id="edit_sku" name="sku" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="edit_nombre" name="nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label>Stock actual</label>
+                <input type="number" id="edit_stock_actual" name="stock_actual" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label>Stock mínimo</label>
+                <input type="number" id="edit_stock_minimo" name="stock_minimo" min="0" required>
+            </div>
+
+            <div class="modal-producto-actions">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalEditar()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn btn-primary">
+                    Actualizar producto
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+
+
+
+<script>
+
+function abrirModalAgregar() {
+
+    document.getElementById("modalAgregar").style.display = "flex";
+
+}
+
+function cerrarModalAgregar() {
+
+    document.getElementById("modalAgregar").style.display = "none";
+
+}
+
+function abrirModalEditar(
+    id,
+    sku,
+    nombre,
+    stock_actual,
+    stock_minimo
+) {
+
+    document.getElementById("modalEditar").style.display = "flex";
+
+    document.getElementById("edit_sku").value = sku;
+    document.getElementById("edit_nombre").value = nombre;
+    document.getElementById("edit_stock_actual").value = stock_actual;
+    document.getElementById("edit_stock_minimo").value = stock_minimo;
+
+    document.getElementById("formEditar").action =
+        "/productos/editar/" + id;
+
+}
+
+function cerrarModalEditar() {
+
+    document.getElementById("modalEditar").style.display = "none";
+
+}
+
+window.onclick = function(event) {
+
+    const modalAgregar =
+        document.getElementById("modalAgregar");
+
+    const modalEditar =
+        document.getElementById("modalEditar");
+
+    if (event.target == modalAgregar) {
+
+        modalAgregar.style.display = "none";
+
+    }
+
+    if (event.target == modalEditar) {
+
+        modalEditar.style.display = "none";
+
+    }
+
+}
+
+</script>
+
+{% endblock %}

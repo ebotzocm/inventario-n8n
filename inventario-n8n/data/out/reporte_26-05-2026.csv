@@ -1,0 +1,9 @@
+﻿sku,nombre,stock_actual,stock_minimo,ventas_semana,sugerencia_reorden,estado
+AGUA-003,Agua embotellada,20,5,0,0,NORMAL
+ARROZ-001,Arroz 1lb,19,0,0,0,NORMAL
+AZUCAR-002,Azucar 1lb,50,3,0,0,NORMAL
+CAFE-003,Cafe 500g,20,2,0,0,NORMAL
+CAFE-006,Cafe en bolsa de una libra,50,10,0,0,NORMAL
+FRIJOL-005,Frijol en bola 1 Lbr,9,3,0,0,NORMAL
+LECHE-004,Leche Liquida 1L,2,0,0,0,NORMAL
+Té-006,Caja de Té de sabores,25,5,0,0,NORMAL

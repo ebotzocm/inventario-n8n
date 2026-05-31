@@ -1,0 +1,4 @@
+admin / admin123
+inventario / inventario123
+ventas / ventas123
+supervisor / supervisor123

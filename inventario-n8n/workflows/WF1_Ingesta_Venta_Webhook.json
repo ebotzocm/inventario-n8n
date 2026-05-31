@@ -1,0 +1,522 @@
+{
+  "name": "WF1_Ingesta_Venta_Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "venta",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "32abaec9-4bb5-4823-8023-1c02dcaf6cca",
+      "name": "Webhook",
+      "webhookId": "d484276f-8889-45db-ba47-23eeaaf6e624"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "729ee76d-545e-45b0-b9a6-18f3f2f72ca3",
+              "name": "sku",
+              "value": "={{$json.body.sku}}",
+              "type": "string"
+            },
+            {
+              "id": "852cbd45-ded3-4570-a53d-6ec1c5fb3cb0",
+              "name": "cantidad",
+              "value": "={{$json.body.cantidad}}",
+              "type": "number"
+            },
+            {
+              "id": "015bc184-caee-4af6-b694-47b315ba7e99",
+              "name": "origen",
+              "value": "={{ $json.body.origen || 'webhook' }}",
+              "type": "string"
+            },
+            {
+              "id": "3088a4d6-b51a-4da5-8e67-206e811a7e1c",
+              "name": "fecha",
+              "value": "={{$now}}",
+              "type": "string"
+            },
+            {
+              "id": "590019c9-2d2a-47bf-85c2-12f123faa698",
+              "name": "raw_json",
+              "value": "={{ JSON.stringify($json.body) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c3a499b4-b3c0-47c0-94b3-ccd0512ebbd1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cf6f340c-b2fb-4324-8a5c-f9a6d01c6058",
+              "leftValue": "={{$json.cantidad}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "abbc94bd-a033-46fd-b7ea-4f16f44f4eae",
+              "leftValue": "={{$json.sku}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "94e3be26-14ec-4460-95a5-2e4a5d2be5cd",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "ventas",
+          "mode": "list",
+          "cachedResultName": "ventas"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "cantidad": "={{$json.cantidad}}",
+            "fecha": "={{$json.fecha}}",
+            "sku": "={{$json.sku}}",
+            "origen": "={{$json.origen}}",
+            "raw_json": "={{$json.raw_json}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sku",
+              "displayName": "sku",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad",
+              "displayName": "cantidad",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "raw_json",
+              "displayName": "raw_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "d75fe35f-d78c-4bce-b354-39807ed80c13",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "nE5iTi1aDbjn9oP4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "auditoria",
+          "mode": "list",
+          "cachedResultName": "auditoria"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha": "={{$now}}",
+            "evento": "VENTA_REGISTRADA",
+            "detalle": "={{ 'Venta registrada SKU: ' + $json.sku + ' Cantidad: ' + $json.cantidad }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evento",
+              "displayName": "evento",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "38c85350-7da1-4af8-a6de-bbb70cad90c8",
+      "name": "Insert rows in a table1",
+      "credentials": {
+        "postgres": {
+          "id": "nE5iTi1aDbjn9oP4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: true,\n  mensaje: \"Venta registrada correctamente\",\n  sku: $json.sku,\n  cantidad: $json.cantidad\n} }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "85516bfc-507e-48ca-91eb-7465bed35d77",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "errores",
+          "mode": "list",
+          "cachedResultName": "errores"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha": "={{$now}}",
+            "workflow": "WF1_Ingesta_Venta_Webhook",
+            "paso": "Validacion",
+            "error_msg": "Entrada inválida: sku vacío o cantidad menor o igual a 0",
+            "payload": "={{$json.raw_json}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "paso",
+              "displayName": "paso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_msg",
+              "displayName": "error_msg",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        624,
+        96
+      ],
+      "id": "db996724-cda4-41d4-b93f-a1adf366cf08",
+      "name": "Insert rows in a table2",
+      "credentials": {
+        "postgres": {
+          "id": "nE5iTi1aDbjn9oP4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": false,\n  \"mensaje\": \"Entrada inválida\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        832,
+        96
+      ],
+      "id": "534aad02-a729-426b-89d3-28cfb4073f70",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert rows in a table2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "057497d5-c05a-41ea-8346-55a0a1fbe0ac",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f357765a7df2fd989b45303872fe544cfc570ab1d4d3a47eba489a8b83739de5"
+  },
+  "id": "7Mqud2eRvpIQrjtF",
+  "tags": []
+}

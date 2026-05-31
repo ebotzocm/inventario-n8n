@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: inv_postgres
+    environment:
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: n8n_pass
+      POSTGRES_DB: inventario
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: inv_n8n
+    user: "0:0" 
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=inventario
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=n8n_pass
+      - N8N_ENCRYPTION_KEY=una_clave_larga_segura_123456789
+      - N8N_RESTRICT_FILE_ACCESS_TO=/files
+      - TZ=America/Guatemala
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./data:/files
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  n8n_data:

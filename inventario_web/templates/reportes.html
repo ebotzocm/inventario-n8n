@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="panel">
+    <div class="panel-header">
+        <h2>Reportes descargables</h2>
+
+        <form method="POST"
+            action="{{ url_for('generar_reporte') }}"
+            onsubmit="event.preventDefault(); abrirConfirmModal(this, 'Generar reporte semanal', '¿Deseas generar un nuevo reporte semanal?');">
+            <button type="submit" class="btn btn-primary">
+                Generar reporte semanal
+            </button>
+        </form>
+
+        <a class="btn-link"href="{{ url_for('descargar_reporte_semanal') }}">
+        Descargar último reporte semanal
+        </a>
+
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Inventario</h3>
+            <p>Excel</p>
+            <a class="btn-link"href="{{ url_for('descargar_inventario_excel') }}">
+            Descargar Inventario
+            </a>
+        </div>
+
+        <div class="card success">
+            <h3>Ventas</h3>
+            <p>Excel</p>
+            <a class="btn-link"href="{{ url_for('descargar_ventas_excel') }}">
+            Descargar Ventas
+            </a>
+        </div>
+
+        <div class="card warning">
+            <h3>Alertas</h3>
+            <p>Excel</p>
+            <a class="btn-link"href="{{ url_for('descargar_alertas_excel') }}">
+            Descargar Alertas
+            </a>
+        </div>
+
+        <div class="card warning">
+            <h3>Ventas Hoy</h3>
+            <p>Excel</p>
+            <a class="btn-link"href="{{ url_for('exportar_ventas_hoy') }}">
+            Descargar Ventas Hoy
+            </a>
+        </div>
+
+        <div class="card warning">
+            <h3>Ventas Semana</h3>
+            <p>Excel</p>
+            <a class="btn-link"href="{{ url_for('exportar_ventas_semana') }}">
+            Descargar ventas Semana
+            </a>
+        </div>
+
+        <div class="card warning">
+            <h3>Alertas Pendientes</h3>
+            <p>Excel</p>
+            <a class="btn-link"href="{{ url_for('exportar_alertas') }}">
+            Descargar Alertas Pendientes
+            </a>
+        </div>
+
+        <div class="card warning">
+            <h3>Inventario Critico</h3>
+            <p>Excel</p>
+            <a class="btn-link"href="{{ url_for('exportar_inventario_critico') }}">
+            Descargar Inventario Critico
+            </a>
+        </div>
+
+
+    </div>
+
+<section class="panel">
+    <h2>Historial de reportes generados por n8n</h2>
+
+    <tbody>
+    {% if reportes %}
+        {% for r in reportes %}
+        <tr>
+            <td>{{ r[0] }}</td>
+            <td>{{ r[1] }}</td>
+            <td>
+                <span class="badge badge-success">
+                    {{ r[2] }}
+                </span>
+            </td>
+            <td>{{ r[3] }}</td>
+        </tr>
+        {% endfor %}
+    {% else %}
+        <tr>
+            <td colspan="4" style="text-align:center;">
+                No hay reportes generados todavía
+            </td>
+        </tr>
+    {% endif %}
+</tbody>
+</section>
+
+{% endblock %}

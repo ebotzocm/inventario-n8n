@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="panel">
+
+    <div class="panel-header">
+        <h2>Alertas del sistema</h2>
+    </div>
+
+    <form method="GET" class="filter-form">
+        <input type="text"
+            name="buscar"
+            placeholder="Buscar SKU, tipo o mensaje"
+            value="{{ buscar or '' }}">
+
+        <select name="estado">
+            <option value="">Todos los estados</option>
+            <option value="PENDIENTE" {% if estado == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+            <option value="EN_PROCESO" {% if estado == 'EN_PROCESO' %}selected{% endif %}>En proceso</option>
+            <option value="ATENDIDA" {% if estado == 'ATENDIDA' %}selected{% endif %}>Atendida</option>
+            <option value="REABASTECIDA" {% if estado == 'REABASTECIDA' %}selected{% endif %}>Reabastecida</option>
+        </select>
+
+        <select name="prioridad">
+            <option value="">Todas las prioridades</option>
+            <option value="ALTA" {% if prioridad == 'ALTA' %}selected{% endif %}>Alta</option>
+            <option value="MEDIA" {% if prioridad == 'MEDIA' %}selected{% endif %}>Media</option>
+            <option value="BAJA" {% if prioridad == 'BAJA' %}selected{% endif %}>Baja</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+
+        <a href="{{ url_for('alertas') }}" class="btn btn-secondary">Limpiar</a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>SKU</th>
+                <th>Tipo</th>
+                <th>Mensaje</th>
+                <th>Prioridad</th>
+                <th>Estado</th>
+                <th>Resolución</th>
+
+                {% if session.get('rol') in ['admin', 'inventario'] %}
+                <th>Acciones</th>
+                {% endif %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for a in alertas %}
+            <tr>
+                <td>{{ a[0] }}</td>
+                <td>{{ a[1] }}</td>
+                <td><strong>{{ a[2] }}</strong></td>
+                <td>{{ a[3] }}</td>
+                <td>{{ a[4] }}</td>
+
+                <td>
+                    {% if a[6] == 'ALTA' %}
+                        <span class="badge badge-danger">ALTA</span>
+                    {% elif a[6] == 'MEDIA' %}
+                        <span class="badge badge-warning">MEDIA</span>
+                    {% else %}
+                        <span class="badge badge-success">BAJA</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if a[5] == 'PENDIENTE' %}
+                        <span class="badge badge-danger">PENDIENTE</span>
+                    {% elif a[5] == 'EN_PROCESO' %}
+                        <span class="badge badge-warning">EN PROCESO</span>
+                    {% elif a[5] == 'REABASTECIDA' %}
+                        <span class="badge badge-success">REABASTECIDA</span>
+                    {% elif a[5] == 'ATENDIDA' %}
+                        <span class="badge badge-success">ATENDIDA</span>
+                    {% else %}
+                        <span class="badge badge-warning">{{ a[5] }}</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if a[7] %}
+                        {{ a[7] }}<br>
+                        <small>Usuario: {{ a[8] }}</small>
+                    {% else %}
+                        <span class="badge badge-warning">Sin resolver</span>
+                    {% endif %}
+                </td>
+
+                {% if session.get('rol') in ['admin', 'inventario'] %}
+                <td>
+                    {% if a[5] == 'PENDIENTE' %}
+                    <form method="POST"
+                          action="{{ url_for('cambiar_estado_alerta', alerta_id=a[0], nuevo_estado='EN_PROCESO') }}"
+                          style="display:inline-block; margin-bottom:5px;">
+                        <button type="submit" class="btn btn-warning">
+                            En proceso
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if a[5] in ['PENDIENTE', 'EN_PROCESO'] %}
+                    <form method="POST"
+                        action="{{ url_for('cambiar_estado_alerta', alerta_id=a[0], nuevo_estado='ATENDIDA') }}"
+                        onsubmit="event.preventDefault(); abrirConfirmModal(this, 'Marcar alerta como atendida', '¿Deseas marcar esta alerta como atendida?');"
+                        style="display:inline-block;">
+                        <button type="submit" class="btn btn-primary">
+                            Atendida
+                        </button>
+                    </form>
+
+                    <form method="POST"
+                        action="{{ url_for('cambiar_estado_alerta', alerta_id=a[0], nuevo_estado='REABASTECIDA') }}"
+                        onsubmit="event.preventDefault(); abrirConfirmModal(this, 'Marcar alerta como reabastecida', '¿Deseas marcar esta alerta como reabastecida?');"
+                        style="display:inline-block;">
+                        <button type="submit" class="btn btn-success">
+                            Reabastecida
+                        </button>
+                    </form>
+                    {% else %}
+                        <span class="badge badge-success">Cerrada</span>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</section>
+
+{% endblock %}
